@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Sample</title>
+    <style>
+
+    </style>
+</head>
+<body>
+    <p>Users</p>
+    <button type="button" id="get_users">
+        Get Users
+    </button>
+
+    <p>Categories</p>
+    <button type="button" id="get_categories">
+        Get Categories
+    </button>
+
+    <script>
+        const getUsersBtn = document.getElementById("get_users");
+        const getCategoriesBtn = document.getElementById("get_categories");
+
+        getUsersBtn.onclick = async function(){
+            fetch(`${window.location.origin}/api/v1/users`)
+                .then(e => e.json())
+                .then(e => console.log(e))
+        }
+
+        getCategoriesBtn.onclick = async function(){
+            fetch(`${window.location.origin}/api/v1/categories`)
+                .then(e => e.json())
+                .then(e => console.log(e))
+        }
+    </script>
+</body>
+</html>
