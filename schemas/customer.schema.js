@@ -11,7 +11,7 @@ const customerInfoSchema = Joi.object({
 
 const patchCustomerSchema = Joi.object({
     rating: realNumber.required(),
-    user_id: id.required(),
+    userId: id.required(),
 });
 
 const customerIdSchema = Joi.object({

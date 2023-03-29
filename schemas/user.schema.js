@@ -9,16 +9,16 @@ const role = Joi.string().min(5)
 const userInfoSchema = Joi.object({
     email: email.required(),
     password: password.required(),
-    first_name: names.required(),
-    last_name: names.required(),
+    firstName: names.required(),
+    lastName: names.required(),
     role: role.required()
 });
 
 const patchUserSchema = Joi.object({
     email: email,
     password: password,
-    first_name: names,
-    last_name: names,
+    firstName: names,
+    lastName: names,
     role: role,
 });
 
