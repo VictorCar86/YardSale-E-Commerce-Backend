@@ -2,7 +2,7 @@ const cors = require('cors');
 const express = require('express');
 const routerApi = require('./routes/index');
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 const boom = require('@hapi/boom');
 
 const { logErrors, errorHandler, boomErrorHandler } = require('./middlewares/error.handler')

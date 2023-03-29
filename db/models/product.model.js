@@ -10,28 +10,23 @@ const ProductSchema = {
         autoIncrement: true,
         type: DataTypes.INTEGER,
     },
-    productName: {
-        field: 'product_name',
+    name: {
         allowNull: false,
         type: DataTypes.STRING,
     },
-    productImage: {
-        field: 'product_image',
+    image: {
         allowNull: true,
         type: DataTypes.STRING,
     },
-    productPrice: {
-        field: 'product_price',
+    price: {
         allowNull: false,
         type: DataTypes.REAL,
     },
-    productRating: {
-        field: 'product_rating',
+    rating: {
         allowNull: true,
         type: DataTypes.REAL,
     },
-    productDescription: {
-        field: 'product_description',
+    description: {
         allowNull: false,
         type: DataTypes.TEXT,
     },

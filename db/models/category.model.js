@@ -9,13 +9,11 @@ const CategorySchema = {
         autoIncrement: true,
         type: DataTypes.INTEGER,
     },
-    categoryName: {
-        field: 'category_name',
+    name: {
         allowNull: false,
         type: DataTypes.STRING,
     },
-    categoryImage: {
-        field: 'category_image',
+    image: {
         allowNull: false,
         unique: true,
         type: DataTypes.STRING,
