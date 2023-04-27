@@ -98,61 +98,37 @@ class ProductsService {
         });
     }
 
-    // putProduct(id, data) {
-    //     const { firstName, lastName } = data;
-    //     const index = this.usersList.findIndex(e => {
-    //         return e.userId === parseInt(id)
-    //     });
+    updateProduct(id, data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentProduct = await this.#FIND_PRODUCT(id);
 
-    //     if (index >= 0){
-    //         const newObj = {
-    //             ...this.usersList[index],
-    //             firstName,
-    //             lastName
-    //         };
-    //         this.usersList[index] = newObj;
+                const dataWithDate = {...data, updatedAt: new Date()};
 
-    //         return { status: "done" }
-    //     }
-    //     else {
-    //         return { status: "not found" }
-    //     }
-    // }
+                const updatedProduct = await currentProduct.update(dataWithDate);
 
-    // patchProduct(id, data) {
-    //     const { firstName, lastName } = data;
-    //     const index = this.usersList.findIndex(elem => {
-    //         return elem.userId === parseInt(id);
-    //     });
+                resolve(updatedProduct);
+            }
+            catch (error) {
+                reject(boom.serverUnavailable(error));
+            }
+        });
+    }
 
-    //     if (index >= 0){
-    //         const newObj = {
-    //             ...this.usersList[index],
-    //             firstName,
-    //             lastName
-    //         };
-    //         this.usersList[index] = newObj;
+    deleteProduct(id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentProduct = await this.#FIND_PRODUCT(id);
 
-    //         return { status: "done" }
-    //     }
-    //     else {
-    //         return { status: "not found" }
-    //     }
-    // }
+                await currentProduct.destroy();
 
-    // deleteProduct(id) {
-    //     const index = this.usersList.findIndex(elem => {
-    //         return elem.userId === parseInt(id)
-    //     });
-
-    //     if (index >= 0){
-    //         this.usersList.splice(index, 1);
-    //         return { status: "done", id }
-    //     }
-    //     else {
-    //         return { status: "not found", id }
-    //     }
-    // }
+                resolve(currentProduct.dataValues);
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
+    }
 }
 
 

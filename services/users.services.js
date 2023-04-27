@@ -15,18 +15,18 @@ class UsersService {
         return user;
     }
 
-    returnUsers() {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const currentQuery = await this.#USER.findAll();
+    // returnUsers() {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
+    //             const currentQuery = await this.#USER.findAll();
 
-                resolve(currentQuery);
-            }
-            catch (error) {
-                reject(boom.serverUnavailable(error));
-            }
-        })
-    }
+    //             resolve(currentQuery);
+    //         }
+    //         catch (error) {
+    //             reject(boom.serverUnavailable(error));
+    //         }
+    //     })
+    // }
 
     findUserById(id) {
         return new Promise(async (resolve, reject) => {
@@ -41,18 +41,34 @@ class UsersService {
         })
     }
 
-    createUser(data) {
+    findUserByEmail(email) {
         return new Promise(async (resolve, reject) => {
             try {
-                const newUser = await this.#USER.create(data);
+                const currentEmail = await this.#USER.findOne({
+                    where: { email }
+                });
 
-                resolve(newUser);
+                resolve(currentEmail);
             }
             catch (error) {
-                reject(boom.serverUnavailable(error));
+                console.log(error)
+                reject(error);
             }
-        });
+        })
     }
+
+    // createUser(data) {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
+    //             const newUser = await this.#USER.create(data);
+
+    //             resolve(newUser);
+    //         }
+    //         catch (error) {
+    //             reject(boom.serverUnavailable(error));
+    //         }
+    //     });
+    // }
 
     updateUser(id, data) {
         return new Promise(async (resolve, reject) => {
@@ -71,20 +87,20 @@ class UsersService {
         });
     }
 
-    deleteUser(id) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const currentUser = await this.#FIND_USER(id);
+    // deleteUser(id) {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
+    //             const currentUser = await this.#FIND_USER(id);
 
-                await currentUser.destroy();
+    //             await currentUser.destroy();
 
-                resolve(currentUser.dataValues);
-            }
-            catch (error) {
-                reject(error);
-            }
-        })
-    }
+    //             resolve(currentUser.dataValues);
+    //         }
+    //         catch (error) {
+    //             reject(error);
+    //         }
+    //     })
+    // }
 }
 
 

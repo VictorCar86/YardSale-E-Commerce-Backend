@@ -28,12 +28,12 @@ class CategoriesService {
         })
     }
 
-    findCustomerById(id) {
+    findCategoryById(id) {
         return new Promise(async (resolve, reject) => {
             try {
-                const currentCustomer = await this.#FIND_CATEGORY(id, { include: ['products'] });
+                const currentCategory = await this.#FIND_CATEGORY(id, { include: ['products'] });
 
-                resolve(currentCustomer.dataValues);
+                resolve(currentCategory.dataValues);
             }
             catch (error) {
                 reject(error);
@@ -54,61 +54,37 @@ class CategoriesService {
         });
     }
 
-    // putCategory(id, data) {
-    //     const { firstName, lastName } = data;
-    //     const index = this.usersList.findIndex(e => {
-    //         return e.userId === parseInt(id)
-    //     });
+    updateCategory(id, data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentCategory = await this.#FIND_CATEGORY(id);
 
-    //     if (index >= 0){
-    //         const newObj = {
-    //             ...this.usersList[index],
-    //             firstName,
-    //             lastName
-    //         };
-    //         this.usersList[index] = newObj;
+                const dataWithDate = {...data, updatedAt: new Date()};
 
-    //         return { status: "done" }
-    //     }
-    //     else {
-    //         return { status: "not found" }
-    //     }
-    // }
+                const updatedCategory = await currentCategory.update(dataWithDate);
 
-    // patchCategory(id, data) {
-    //     const { firstName, lastName } = data;
-    //     const index = this.usersList.findIndex(elem => {
-    //         return elem.userId === parseInt(id);
-    //     });
+                resolve(updatedCategory);
+            }
+            catch (error) {
+                reject(boom.serverUnavailable(error));
+            }
+        });
+    }
 
-    //     if (index >= 0){
-    //         const newObj = {
-    //             ...this.usersList[index],
-    //             firstName,
-    //             lastName
-    //         };
-    //         this.usersList[index] = newObj;
+    deleteCategory(id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentCategory = await this.#FIND_CATEGORY(id);
 
-    //         return { status: "done" }
-    //     }
-    //     else {
-    //         return { status: "not found" }
-    //     }
-    // }
+                await currentCategory.destroy();
 
-    // deleteCategory(id) {
-    //     const index = this.usersList.findIndex(elem => {
-    //         return elem.userId === parseInt(id)
-    //     });
-
-    //     if (index >= 0){
-    //         this.usersList.splice(index, 1);
-    //         return { status: "done", id }
-    //     }
-    //     else {
-    //         return { status: "not found", id }
-    //     }
-    // }
+                resolve(currentCategory.dataValues);
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
+    }
 }
 
 

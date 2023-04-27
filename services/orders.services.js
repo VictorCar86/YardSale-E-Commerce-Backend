@@ -3,6 +3,8 @@ const boom = require('@hapi/boom');
 class OrdersService {
 
     #SEQUELIZE = require('../libs/sequelize');
+    #CUSTOMER = this.#SEQUELIZE.models.Customer;
+    #USER = this.#SEQUELIZE.models.User;
     #ORDER = this.#SEQUELIZE.models.Order;
     #ORDER_PRODUCT = this.#SEQUELIZE.models.Order_Product;
 
@@ -29,18 +31,52 @@ class OrdersService {
         });
     }
 
+    returnOrdersByUserId(id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const queryOptions = {
+                    where: {
+                        '$customer.user.id$': id,
+                    },
+                    include: ['items',
+                        {
+                            association: 'customer',
+                            include: [{
+                                model: this.#USER,
+                                as: 'user',
+                                attributes: { exclude: ['password'] },
+                            }],
+                        }
+                    ],
+                };
+
+                const currentQuery = await this.#ORDER.findAll(queryOptions);
+
+                resolve(currentQuery);
+            }
+            catch (error) {
+                reject(boom.serverUnavailable(error));
+            }
+        });
+    }
+
     findOrderById(id) {
         return new Promise(async (resolve, reject) => {
             try {
-                const currentOrder = await this.#FIND_ORDER(id, {
-                    include: [
-                        'items',
+                const queryOptions = {
+                    include: ['items',
                         {
                             association: 'customer',
-                            include: ['user'],
+                            include: [{
+                                model: this.#USER,
+                                as: 'user',
+                                attributes: { exclude: ['password'] },
+                            }],
                         }
                     ],
-                });
+                };
+
+                const currentOrder = await this.#FIND_ORDER(id, queryOptions);
 
                 resolve(currentOrder.dataValues);
             }
@@ -50,10 +86,14 @@ class OrdersService {
         });
     }
 
-    createOrder(data) {
+    createOrder(userId) {
         return new Promise(async (resolve, reject) => {
             try {
-                const newOrder = await this.#ORDER.create(data);
+                const customer = await this.#CUSTOMER.findOne({
+                    where: { userId }
+                });
+
+                const newOrder = await this.#ORDER.create({ customerId: customer.id });
 
                 resolve(newOrder);
             }
@@ -63,74 +103,51 @@ class OrdersService {
         });
     }
 
+    updateOrder(id, data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentOrder = await this.#FIND_ORDER(id);
+
+                const dataWithDate = {...data, updatedAt: new Date()};
+
+                const updatedOrder = await currentOrder.update(dataWithDate);
+
+                resolve(updatedOrder);
+            }
+            catch (error) {
+                reject(boom.serverUnavailable(error));
+            }
+        });
+    }
+
+    deleteOrder(id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentOrder = await this.#FIND_ORDER(id);
+
+                await currentOrder.destroy();
+
+                resolve(currentOrder.dataValues);
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    /* Order_Product */
     addItems(data) {
         return new Promise(async (resolve, reject) => {
             try {
-                const newOrder = await this.#ORDER_PRODUCT.create(data);
+                const newOrder_Product = await this.#ORDER_PRODUCT.create(data);
 
-                resolve(newOrder);
+                resolve(newOrder_Product);
             }
             catch (error) {
                 reject(boom.serverUnavailable(error));
             }
         });
     }
-
-    // putOrder(id, data) {
-    //     const { firstName, lastName } = data;
-    //     const index = this.usersList.findIndex(e => {
-    //         return e.userId === parseInt(id)
-    //     });
-
-    //     if (index >= 0){
-    //         const newObj = {
-    //             ...this.usersList[index],
-    //             firstName,
-    //             lastName
-    //         };
-    //         this.usersList[index] = newObj;
-
-    //         return { status: "done" }
-    //     }
-    //     else {
-    //         return { status: "not found" }
-    //     }
-    // }
-
-    // patchOrder(id, data) {
-    //     const { firstName, lastName } = data;
-    //     const index = this.usersList.findIndex(elem => {
-    //         return elem.userId === parseInt(id);
-    //     });
-
-    //     if (index >= 0){
-    //         const newObj = {
-    //             ...this.usersList[index],
-    //             firstName,
-    //             lastName
-    //         };
-    //         this.usersList[index] = newObj;
-
-    //         return { status: "done" }
-    //     }
-    //     else {
-    //         return { status: "not found" }
-    //     }
-    // }
-
-    // deleteOrder(id) {
-    //     const index = this.usersList.findIndex(elem => {
-    //         return elem.userId === parseInt(id)
-    //     });
-
-    //     if (index >= 0){
-    //         this.usersList.splice(index, 1);
-    //         return { status: "done", id }
-    //     }
-    //     else {
-    //         return { status: "not found", id }
-    //     }
-    // }
 }
 
 module.exports = OrdersService;

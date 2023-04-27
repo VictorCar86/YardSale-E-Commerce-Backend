@@ -1,8 +1,9 @@
 const router = require('express').Router();
-const validatorHandler = require('../middlewares/validate.handler');
-const { orderIdSchema, createOrderSchema, createItemSchema } = require('../schemas/order.schema');
+const { validatorHandler } = require('../middlewares/validate.handler');
+const { orderIdSchema, createItemSchema } = require('../schemas/order.schema');
 const OrdersService = require('../services/orders.services');
 const service = new OrdersService();
+const passport = require('passport');
 // const boom = require('@hapi/boom');
 
 router.get('/',
@@ -12,12 +13,21 @@ router.get('/',
         try {
             let result = await service.returnOrders();
 
-            // if (offset){
-            //     result = result.slice(parseInt(offset));
-            // }
-            // if (size){
-            //     result = result.slice(0, parseInt(size));
-            // }
+            res.status(200).json(result);
+        }
+        catch (err){
+            next(err);
+        }
+    }
+);
+
+router.get('/user',
+    passport.authenticate('jwt', { session: false }),
+    async (req, res, next) => {
+        const { sub } = req.user;
+
+        try {
+            let result = await service.returnOrdersByUserId(sub);
 
             res.status(200).json(result);
         }
@@ -44,16 +54,14 @@ router.get('/:id',
 );
 
 router.post('/',
-    validatorHandler(createOrderSchema, 'body'),
+    passport.authenticate('jwt', { session: false }),
     async (req, res, next) => {
-        const body = req.body;
+        const { sub } = req.user;
 
         try {
-            const result = await service.createOrder(body);
+            const result = await service.createOrder(sub);
 
-            res.status(201).json({
-                data: result,
-            });
+            res.status(201).json(result);
         }
         catch (err){
             next(err);
@@ -71,35 +79,13 @@ router.post('/:id/items',
         try {
             const result = await service.addItems({orderId: Number(id), ...body});
 
-            res.status(201).json({
-                data: result,
-            });
+            res.status(201).json(result);
         }
         catch (err){
             next(err);
         }
     }
 );
-
-// router.put('/:id',
-//     validatorHandler(categoryIdSchema, 'params'),
-//     validatorHandler(createCategorySchema, 'body'),
-//     async (req, res, next) => {
-//         const body = req.body;
-//         const { id } = req.params;
-
-//         try {
-//             const result = await service.updateUser(id, body);
-
-//             res.status(200).json({
-//                 data: result,
-//             });
-//         }
-//         catch (err){
-//             next(err);
-//         }
-//     }
-// );
 
 // router.patch('/:id',
 //     validatorHandler(categoryIdSchema, 'params'),

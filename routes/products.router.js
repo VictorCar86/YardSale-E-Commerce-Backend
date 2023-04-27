@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const validatorHandler = require('../middlewares/validate.handler');
-const { productIdSchema, createProductSchema, productQuerySchema, /*updateProductSchema*/ } = require('../schemas/product.schema');
+const { validatorHandler } = require('../middlewares/validate.handler');
+const { productIdSchema, createProductSchema, productQuerySchema, updateProductSchema } = require('../schemas/product.schema');
 const ProductsService = require('../services/products.services');
 const service = new ProductsService();
 // const boom = require('@hapi/boom');
@@ -51,9 +51,7 @@ router.post('/',
         try {
             const result = await service.createProduct(body);
 
-            res.status(201).json({
-                data: result,
-            });
+            res.status(201).json(result);
         }
         catch (err){
             next(err);
@@ -81,42 +79,38 @@ router.post('/',
 //     }
 // );
 
-// router.patch('/:id',
-//     validatorHandler(productIdSchema, 'params'),
-//     validatorHandler(updateProductSchema, 'body'),
-//     async (req, res, next) => {
-//         const body = req.body;
-//         const { id } = req.params;
+router.patch('/:id',
+    validatorHandler(productIdSchema, 'params'),
+    validatorHandler(updateProductSchema, 'body'),
+    async (req, res, next) => {
+        const body = req.body;
+        const { id } = req.params;
 
-//         try {
-//             const result = await service.updateUser(id, body);
+        try {
+            const result = await service.updateProduct(id, body);
 
-//             res.status(200).json({
-//                 data: result,
-//             });
-//         }
-//         catch (err){
-//             next(err);
-//         }
-//     }
-// );
+            res.status(200).json(result);
+        }
+        catch (err){
+            next(err);
+        }
+    }
+);
 
-// router.delete('/:id',
-//     validatorHandler(productIdSchema, 'params'),
-//     async (req, res, next) => {
-//         const { id } = req.params;
+router.delete('/:id',
+    validatorHandler(productIdSchema, 'params'),
+    async (req, res, next) => {
+        const { id } = req.params;
 
-//         try {
-//             const result = await service.deleteUser(id);
+        try {
+            const result = await service.deleteProduct(id);
 
-//             res.status(200).json({
-//                 data: result,
-//             });
-//         }
-//         catch (err){
-//             next(err);
-//         }
-//     }
-// );
+            res.status(200).json(result);
+        }
+        catch (err){
+            next(err);
+        }
+    }
+);
 
 module.exports = router;

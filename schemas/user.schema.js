@@ -7,23 +7,23 @@ const password = Joi.string().min(8);
 const role = Joi.string().min(5)
 
 const userInfoSchema = Joi.object({
-    email: email.required(),
-    password: password.required(),
     firstName: names.required(),
     lastName: names.required(),
-    role: role.required()
+    email: email.required(),
+    password: password.required(),
+    role,
 });
 
 const patchUserSchema = Joi.object({
-    email: email,
-    password: password,
     firstName: names,
     lastName: names,
-    role: role,
+    email,
+    password,
+    role,
 });
 
 const userIdSchema = Joi.object({
     id: id.required(),
 });
 
-module.exports = { userInfoSchema, patchUserSchema, userIdSchema }
+module.exports = { userInfoSchema, patchUserSchema, userIdSchema };

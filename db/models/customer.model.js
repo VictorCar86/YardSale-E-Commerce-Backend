@@ -5,6 +5,7 @@ const CUSTOMER_TABLE = 'customers';
 
 const CustomerSchema = {
     id: {
+        unique: true,
         primaryKey: true,
         allowNull: false,
         autoIncrement: true,
@@ -29,17 +30,21 @@ const CustomerSchema = {
         type: DataTypes.INTEGER,
         references: {
             model: USER_TABLE,
-            key: 'id'
+            key: 'id',
         }
     },
 };
 
 class Customer extends Model {
     static associate(models){
-        this.belongsTo(models.User, { as: 'user' });
+        this.belongsTo(models.User, {
+            as: 'user',
+            onDelete: 'cascade',
+            hooks: true
+        });
         this.hasMany(models.Order, {
             as: 'orders',
-            foreignKey: 'customerId'
+            foreignKey: 'customerId',
         });
     }
     static config(sequelize){

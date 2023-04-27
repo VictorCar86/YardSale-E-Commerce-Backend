@@ -5,8 +5,8 @@ class CustomersService {
     #SEQUELIZE = require('../libs/sequelize');
     #CUSTOMER = this.#SEQUELIZE.models.Customer;
 
-    async #FIND_CUSTOMER(id){
-        const user = await this.#CUSTOMER.findByPk(id);
+    async #FIND_CUSTOMER(id, options = {}){
+        const user = await this.#CUSTOMER.findByPk(id, options);
 
         if (user === null){
             throw boom.notFound(`The element with id '${id}' does not exist`);
@@ -18,9 +18,6 @@ class CustomersService {
     returnCustomers() {
         return new Promise(async (resolve, reject) => {
             try {
-                // delete this.#CUSTOMER.prototype.rawAttributes.userId;
-                console.log(this.#CUSTOMER.prototype)
-
                 const currentQuery = await this.#CUSTOMER.findAll({
                     include: ['user']
                 });
@@ -33,25 +30,30 @@ class CustomersService {
         })
     }
 
-    // findCustomerById(id) {
-    //     return new Promise(async (resolve, reject) => {
-    //         try {
-    //             const currentCustomer = await this.#FIND_CUSTOMER(id);
+    findCustomerById(id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentCustomer = await this.#FIND_CUSTOMER(id, {
+                    include: ['user']
+                });
 
-    //             resolve(currentCustomer.dataValues);
-    //         }
-    //         catch (error) {
-    //             reject(error);
-    //         }
-    //     });
-    // }
+                resolve(currentCustomer.dataValues);
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
+    }
 
     createCustomer(data) {
         return new Promise(async (resolve, reject) => {
             try {
-                const newCustomer = await this.#CUSTOMER.create(data, {
-                    include: ['user']
-                });
+                const newCustomer = await this.#CUSTOMER.create(
+                    { ...data, role: 'customer' },
+                    { include: ['user'] }
+                );
+
+                delete newCustomer.user.dataValues.password;
 
                 resolve(newCustomer);
             }
@@ -78,20 +80,20 @@ class CustomersService {
         });
     }
 
-    // deleteCustomer(id) {
-    //     return new Promise(async (resolve, reject) => {
-    //         try {
-    //             const currentCustomer = await this.#FIND_CUSTOMER(id);
+    deleteCustomer(id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentCustomer = await this.#FIND_CUSTOMER(id);
 
-    //             await currentCustomer.destroy();
+                await currentCustomer.destroy();
 
-    //             resolve(currentCustomer.dataValues);
-    //         }
-    //         catch (error) {
-    //             reject(error);
-    //         }
-    //     })
-    // }
+                resolve(currentCustomer.dataValues);
+            }
+            catch (error) {
+                reject(error);
+            }
+        })
+    }
 }
 
 

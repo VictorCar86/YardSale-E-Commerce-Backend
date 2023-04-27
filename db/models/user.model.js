@@ -1,4 +1,5 @@
 const { Model, DataTypes, Sequelize } = require('sequelize');
+const { encryptPassword } = require('../../utils/encrypt');
 
 const USER_TABLE = 'users';
 
@@ -26,6 +27,11 @@ const UserSchema = {
     },
     password: {
         allowNull: false,
+        type: DataTypes.STRING,
+    },
+    recoveryToken: {
+        field: 'recovery_token',
+        allowNull: true,
         type: DataTypes.STRING,
     },
     role: {
@@ -56,6 +62,12 @@ class User extends Model {
             tableName: USER_TABLE,
             modelName: 'User',
             timestamps: false,
+            hooks: {
+                beforeCreate: async (user) => {
+                    const hashPassword = await encryptPassword(user.password);
+                    user.password = hashPassword;
+                },
+            },
         }
     }
 }

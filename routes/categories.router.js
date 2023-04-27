@@ -1,6 +1,7 @@
 const router = require('express').Router();
-const validatorHandler = require('../middlewares/validate.handler');
-const { categoryIdSchema, createCategorySchema, /*updateCategorySchema*/ } = require('../schemas/category.schema');
+const passport = require('passport');
+const { validatorHandler, adminCheckHandler } = require('../middlewares/validate.handler');
+const { categoryIdSchema, createCategorySchema, updateCategorySchema } = require('../schemas/category.schema');
 const CategoriesService = require('../services/categories.services');
 const service = new CategoriesService();
 // const boom = require('@hapi/boom');
@@ -26,7 +27,7 @@ router.get('/:id',
         const { id } = req.params;
 
         try {
-            let result = await service.findCustomerById(id);
+            let result = await service.findCategoryById(id);
 
             res.status(200).json(result);
         }
@@ -37,6 +38,8 @@ router.get('/:id',
 );
 
 router.post('/',
+    passport.authenticate('jwt', { session: false }),
+    adminCheckHandler(),
     validatorHandler(createCategorySchema, 'body'),
     async (req, res, next) => {
         const body = req.body;
@@ -60,7 +63,7 @@ router.post('/',
 //         const { id } = req.params;
 
 //         try {
-//             const result = await service.updateUser(id, body);
+//             const result = await service.updateCategory(id, body);
 
 //             res.status(200).json({
 //                 data: result,
@@ -72,42 +75,38 @@ router.post('/',
 //     }
 // );
 
-// router.patch('/:id',
-//     validatorHandler(categoryIdSchema, 'params'),
-//     validatorHandler(updateCategorySchema, 'body'),
-//     async (req, res, next) => {
-//         const body = req.body;
-//         const { id } = req.params;
+router.patch('/:id',
+    validatorHandler(categoryIdSchema, 'params'),
+    validatorHandler(updateCategorySchema, 'body'),
+    async (req, res, next) => {
+        const body = req.body;
+        const { id } = req.params;
 
-//         try {
-//             const result = await service.updateUser(id, body);
+        try {
+            const result = await service.updateCategory(id, body);
 
-//             res.status(200).json({
-//                 data: result,
-//             });
-//         }
-//         catch (err){
-//             next(err);
-//         }
-//     }
-// );
+            res.status(200).json(result);
+        }
+        catch (err){
+            next(err);
+        }
+    }
+);
 
-// router.delete('/:id',
-//     validatorHandler(categoryIdSchema, 'params'),
-//     async (req, res, next) => {
-//         const { id } = req.params;
+router.delete('/:id',
+    validatorHandler(categoryIdSchema, 'params'),
+    async (req, res, next) => {
+        const { id } = req.params;
 
-//         try {
-//             const result = await service.deleteUser(id);
+        try {
+            const result = await service.deleteCategory(id);
 
-//             res.status(200).json({
-//                 data: result,
-//             });
-//         }
-//         catch (err){
-//             next(err);
-//         }
-//     }
-// );
+            res.status(200).json(result);
+        }
+        catch (err){
+            next(err);
+        }
+    }
+);
 
 module.exports = router;
