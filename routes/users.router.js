@@ -2,6 +2,7 @@ const router = require('express').Router();
 const { validatorHandler } = require('../middlewares/validate.handler');
 const { userIdSchema, patchUserSchema } = require('../schemas/user.schema');
 const UsersService = require('../services/users.services');
+const jwt = require('jsonwebtoken');
 const service = new UsersService();
 const boom = require('@hapi/boom');
 
@@ -13,18 +14,33 @@ router.get('/',
     }
 );
 
-router.get('/:id',
-    validatorHandler(userIdSchema, 'params'),
+// router.get('/:id',
+//     validatorHandler(userIdSchema, 'params'),
+//     async (req, res, next) => {
+//         const { id } = req.params;
+
+//         try {
+//             let result = await service.findUserById(id);
+
+//             res.status(200).json(result);
+//         }
+//         catch (err){
+//             next(err);
+//         }
+//     }
+// );
+
+router.get('/info',
     async (req, res, next) => {
-        const { id } = req.params;
-
         try {
-            let result = await service.findUserById(id);
+            const cookieToken = (req.cookies.session).replace(/"/g, '');
+            const token = jwt.verify(cookieToken, process.env.JWT_LOGIN_SECRET);
 
+            let result = await service.findUserById(token.sub);
             res.status(200).json(result);
         }
         catch (err){
-            next(err);
+            next(boom.badRequest(`Introduce a valid token. ${req.cookies.session}`));
         }
     }
 );

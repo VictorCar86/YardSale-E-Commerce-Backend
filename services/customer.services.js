@@ -54,6 +54,9 @@ class CustomersService {
                 );
 
                 delete newCustomer.user.dataValues.password;
+                delete newCustomer.user.dataValues.createdAt;
+                delete newCustomer.user.dataValues.updatedAt;
+                delete newCustomer.user.dataValues.recoveryToken;
 
                 resolve(newCustomer);
             }

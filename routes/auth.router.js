@@ -9,15 +9,33 @@ router.post('/login',
     (req, res, next) => {
         try {
             const user = req.user;
-
-            const payload = { sub: user.id, role: user.role };
-
+            const payload = { sub: user.id, role: user.role, /*email: user.email*/ };
             const token = jwt.sign(payload, process.env.JWT_LOGIN_SECRET);
 
-            res.status(201).json({ token });
+            res.status(200).cookie('session', JSON.stringify(token), {
+                // domain: 'http://127.0.0.1:5173/',
+                // path: '/login',
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true,
+                expires: new Date(new Date().getTime() + (60000 * 10)),
+            }).json('Cookie created');
         }
         catch (err){
             next(err);
+        }
+    }
+);
+
+router.get('/session-status',
+    (req, res, /*next*/) => {
+        const session = req.cookies.session;
+        // console.log("🚀 ~ file: auth.router.js:35 ~ session:", session);
+
+        if (session){
+            res.status(201).json(session);
+        } else {
+            res.status(501).json('Login Session Not Found.');
         }
     }
 );

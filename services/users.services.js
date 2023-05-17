@@ -5,8 +5,8 @@ class UsersService {
     #SEQUELIZE = require('../libs/sequelize');
     #USER = this.#SEQUELIZE.models.User;
 
-    async #FIND_USER(id){
-        const user = await this.#USER.findByPk(id);
+    async #FIND_USER(id, options = {}){
+        const user = await this.#USER.findByPk(id, options);
 
         if (user === null){
             throw boom.notFound(`The element with id '${id}' does not exist`);
@@ -31,7 +31,9 @@ class UsersService {
     findUserById(id) {
         return new Promise(async (resolve, reject) => {
             try {
-                const currentUser = await this.#FIND_USER(id);
+                const currentUser = await this.#FIND_USER(id, {
+                    attributes: ['first_name', 'last_name', 'email'],
+                });
 
                 resolve(currentUser.dataValues);
             }

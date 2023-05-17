@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const passport = require('passport');
+const jwt = require('jsonwebtoken');
 const { validatorHandler } = require('../middlewares/validate.handler');
 const { customerIdSchema, customerInfoSchema, /*patchCustomerSchema*/ } = require('../schemas/customer.schema');
 const CustomersService = require('../services/customer.services');
@@ -44,9 +45,18 @@ router.post('/',
         const body = req.body;
 
         try {
-            const result = await service.createCustomer(body);
+            const customer = await service.createCustomer(body);
+            // console.log("🚀 ~ file: customers.router.js:49 ~ customer:", customer.user)
 
-            res.status(201).json(result);
+            const payload = {
+                sub: customer.user.id,
+                role: customer.user.role,
+                email: customer.user.email
+            };
+
+            const token = jwt.sign(payload, process.env.JWT_LOGIN_SECRET);
+
+            res.status(201).json(token);
         }
         catch (err){
             next(err);
