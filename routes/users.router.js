@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { validatorHandler } = require('../middlewares/validate.handler');
-const { userIdSchema, patchUserSchema } = require('../schemas/user.schema');
+const { patchUserSchema } = require('../schemas/user.schema');
 const UsersService = require('../services/users.services');
 const jwt = require('jsonwebtoken');
 const service = new UsersService();
@@ -32,15 +32,15 @@ router.get('/',
 
 router.get('/info',
     async (req, res, next) => {
+        const cookieToken = req.cookies.session;
         try {
-            const cookieToken = (req.cookies.session).replace(/"/g, '');
             const token = jwt.verify(cookieToken, process.env.JWT_LOGIN_SECRET);
 
             let result = await service.findUserById(token.sub);
             res.status(200).json(result);
         }
         catch (err){
-            next(boom.badRequest(`Introduce a valid token. ${req.cookies.session}`));
+            next(boom.unauthorized('Introduce a valid token or refresh your session.'));
         }
     }
 );
@@ -53,20 +53,20 @@ router.post('/',
     }
 );
 
-router.patch('/:id',
-    validatorHandler(userIdSchema, 'params'),
+router.patch('/',
     validatorHandler(patchUserSchema, 'body'),
     async (req, res, next) => {
         const body = req.body;
-        const { id } = req.params;
+        const cookieToken = req.cookies.session;
 
         try {
-            const result = await service.updateUser(id, body);
+            const token = jwt.verify(cookieToken, process.env.JWT_LOGIN_SECRET);
+            const result = await service.updateUser(token.sub, body);
 
             res.status(200).json(result);
         }
         catch (err){
-            next(err);
+            next(boom.unauthorized('Introduce a valid token or refresh your session.'));
         }
     }
 );

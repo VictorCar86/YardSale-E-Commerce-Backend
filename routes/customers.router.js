@@ -46,17 +46,18 @@ router.post('/',
 
         try {
             const customer = await service.createCustomer(body);
-            // console.log("🚀 ~ file: customers.router.js:49 ~ customer:", customer.user)
-
-            const payload = {
-                sub: customer.user.id,
-                role: customer.user.role,
-                email: customer.user.email
-            };
-
+            const user = customer.user;
+            const payload = { sub: user.id, role: user.role, /*email: user.email*/ };
             const token = jwt.sign(payload, process.env.JWT_LOGIN_SECRET);
 
-            res.status(201).json(token);
+            res.status(200).cookie('session', token, {
+                // domain: 'http://127.0.0.1:5173/',
+                // path: '/login',
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true,
+                expires: new Date(new Date().getTime() + (60000 * 10)),
+            }).json('Session created');
         }
         catch (err){
             next(err);
