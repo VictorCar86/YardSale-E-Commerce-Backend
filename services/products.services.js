@@ -19,7 +19,7 @@ class ProductsService {
     returnProducts({ page = 0, minPrice, maxPrice }) {
         return new Promise(async (resolve, reject) => {
             try {
-                let itemsPerPage = 2;
+                let itemsPerPage = 10;
                 let currentOffset = 0;
                 const slicer = page - 1;
 
@@ -47,6 +47,7 @@ class ProductsService {
 
                 let options = {
                     include: ['category'],
+                    attributes: { exclude: ['createdAt', 'updatedAt'] },
                     limit: itemsPerPage || undefined,
                     offset: currentOffset || undefined,
                     where: {}

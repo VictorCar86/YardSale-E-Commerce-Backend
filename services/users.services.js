@@ -5,34 +5,33 @@ class UsersService {
     #SEQUELIZE = require('../libs/sequelize');
     #USER = this.#SEQUELIZE.models.User;
 
-    async #FIND_USER(id, options = {}){
-        const user = await this.#USER.findByPk(id, options);
+    async #FIND_USER(userId, options = {}){
+        const user = await this.#USER.findByPk(userId, options);
 
         if (user === null){
-            throw boom.notFound(`The element with id '${id}' does not exist`);
+            throw boom.notFound();
         }
 
         return user;
     }
 
-    // returnUsers() {
-    //     return new Promise(async (resolve, reject) => {
-    //         try {
-    //             const currentQuery = await this.#USER.findAll();
-
-    //             resolve(currentQuery);
-    //         }
-    //         catch (error) {
-    //             reject(boom.serverUnavailable(error));
-    //         }
-    //     })
-    // }
-
-    findUserById(id) {
+    returnUsers() {
         return new Promise(async (resolve, reject) => {
             try {
-                const currentUser = await this.#FIND_USER(id, {
-                    attributes: ['first_name', 'last_name', 'email'],
+                const currentQuery = await this.#USER.findAll();
+                resolve(currentQuery);
+            }
+            catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    findUserById(userId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentUser = await this.#FIND_USER(userId, {
+                    attributes: ['firstName', 'lastName', 'email', 'role'],
                 });
 
                 resolve(currentUser.dataValues);
@@ -47,13 +46,28 @@ class UsersService {
         return new Promise(async (resolve, reject) => {
             try {
                 const currentEmail = await this.#USER.findOne({
-                    where: { email }
+                    where: { email },
+                    include: ['customer'],
                 });
 
                 resolve(currentEmail);
             }
             catch (error) {
                 console.log(error)
+                reject(error);
+            }
+        })
+    }
+
+    findRecoveryTokenById(userId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const currentUser = await this.#FIND_USER(userId, {
+                    attributes: ['recoveryToken'],
+                });
+                resolve(currentUser.recoveryToken);
+            }
+            catch (error) {
                 reject(error);
             }
         })
@@ -72,16 +86,14 @@ class UsersService {
     //     });
     // }
 
-    updateUser(id, data) {
+    updateUser(userId, data) {
         return new Promise(async (resolve, reject) => {
             try {
-                const currentUser = await this.#FIND_USER(id);
-
+                const currentUser = await this.#FIND_USER(userId);
                 const dataWithDate = {...data, updated_at: new Date()};
 
-                const updatedUser = await currentUser.update(dataWithDate);
-
-                resolve(updatedUser);
+                const { firstName, lastName, email, role } = await currentUser.update(dataWithDate);
+                resolve({ firstName, lastName, email, role });
             }
             catch (error) {
                 reject(boom.serverUnavailable(error));

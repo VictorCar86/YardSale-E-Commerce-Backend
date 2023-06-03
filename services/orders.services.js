@@ -18,11 +18,22 @@ class OrdersService {
         return user;
     }
 
+    createOrder(customerId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const newOrder = await this.#ORDER.create({ customerId });
+                resolve(newOrder);
+            }
+            catch (error) {
+                reject(boom.serverUnavailable(error));
+            }
+        });
+    }
+
     returnOrders() {
         return new Promise(async (resolve, reject) => {
             try {
                 const currentQuery = await this.#ORDER.findAll();
-
                 resolve(currentQuery);
             }
             catch (error) {
@@ -31,22 +42,19 @@ class OrdersService {
         });
     }
 
-    returnOrdersByUserId(id) {
+    returnOrdersByCustomerId(customerId) {
         return new Promise(async (resolve, reject) => {
             try {
                 const queryOptions = {
-                    where: {
-                        '$customer.user.id$': id,
+                    attributes: {
+                        exclude: ['id', 'customerId'],
                     },
-                    include: ['items',
+                    where: { customerId },
+                    include: [
                         {
-                            association: 'customer',
-                            include: [{
-                                model: this.#USER,
-                                as: 'user',
-                                attributes: { exclude: ['password'] },
-                            }],
-                        }
+                            association: 'items',
+                            attributes: { exclude: ['createdAt', 'updatedAt'] },
+                        },
                     ],
                 };
 
@@ -60,7 +68,7 @@ class OrdersService {
         });
     }
 
-    findOrderById(id) {
+    findOrderById(orderId) {
         return new Promise(async (resolve, reject) => {
             try {
                 const queryOptions = {
@@ -75,30 +83,12 @@ class OrdersService {
                         }
                     ],
                 };
-
-                const currentOrder = await this.#FIND_ORDER(id, queryOptions);
+                const currentOrder = await this.#FIND_ORDER(orderId, queryOptions);
 
                 resolve(currentOrder.dataValues);
             }
             catch (error) {
                 reject(error);
-            }
-        });
-    }
-
-    createOrder(userId) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const customer = await this.#CUSTOMER.findOne({
-                    where: { userId }
-                });
-
-                const newOrder = await this.#ORDER.create({ customerId: customer.id });
-
-                resolve(newOrder);
-            }
-            catch (error) {
-                reject(boom.serverUnavailable(error));
             }
         });
     }
@@ -120,10 +110,10 @@ class OrdersService {
         });
     }
 
-    deleteOrder(id) {
+    deleteOrder(orderId) {
         return new Promise(async (resolve, reject) => {
             try {
-                const currentOrder = await this.#FIND_ORDER(id);
+                const currentOrder = await this.#FIND_ORDER(orderId);
 
                 await currentOrder.destroy();
 
@@ -136,12 +126,21 @@ class OrdersService {
     }
 
     /* Order_Product */
-    addItems(data) {
+    addItemsToOrder(data, customerId) {
         return new Promise(async (resolve, reject) => {
             try {
-                const newOrder_Product = await this.#ORDER_PRODUCT.create(data);
-
-                resolve(newOrder_Product);
+                if (!data.orderId && Array.isArray(data.products)){
+                    const newOrder = await this.createOrder(customerId);
+                    data.products = data.products.map(product => {
+                        return { ...product, orderId: newOrder.id };
+                    });
+                    await this.#ORDER_PRODUCT.bulkCreate(data.products);
+                }
+                else {
+                    await this.#ORDER_PRODUCT.create(data);
+                }
+                const currentOrdersState = await this.returnOrdersByCustomerId(customerId);
+                resolve(currentOrdersState);
             }
             catch (error) {
                 reject(boom.serverUnavailable(error));

@@ -49,20 +49,26 @@ const ProductSchema = {
         type: DataTypes.INTEGER,
         references: {
             model: CATEGORY_TABLE,
-            key: 'id'
+            key: 'id',
         }
     },
 };
 
 class Product extends Model {
-    static associate(models){
+    static associate(models) {
         this.belongsTo(models.Category, {
             as: 'category',
             hooks: true,
             onDelete: 'cascade',
         });
+        this.belongsToMany(models.Customer, {
+            as: 'items',
+            through: models.ShoppingCart,
+            foreignKey: 'productId',
+            otherKey: 'customerId',
+        });
     }
-    static config(sequelize){
+    static config(sequelize) {
         return {
             sequelize,
             tableName: PRODUCT_TABLE,

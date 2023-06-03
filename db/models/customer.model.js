@@ -36,18 +36,24 @@ const CustomerSchema = {
 };
 
 class Customer extends Model {
-    static associate(models){
+    static associate(models) {
         this.belongsTo(models.User, {
             as: 'user',
             onDelete: 'cascade',
-            hooks: true
+            hooks: true,
         });
         this.hasMany(models.Order, {
             as: 'orders',
             foreignKey: 'customerId',
         });
+        this.belongsToMany(models.Product, {
+            as: 'items',
+            through: models.ShoppingCart,
+            foreignKey: 'customerId',
+            otherKey: 'productId',
+        });
     }
-    static config(sequelize){
+    static config(sequelize) {
         return {
             sequelize,
             tableName: CUSTOMER_TABLE,

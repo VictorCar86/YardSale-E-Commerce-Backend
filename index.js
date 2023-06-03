@@ -8,7 +8,7 @@ const port = process.env.PORT || 8080;
 
 const { logErrors, errorHandler, boomErrorHandler } = require('./middlewares/error.handler')
 
-const whiteList = ['http://127.0.0.1:5173', 'http://localhost:5173'];
+const whiteList = [process.env.FRONTEND_URL];
 
 const corsOptions = {
     origin: (origin, callback) => {

@@ -1,13 +1,13 @@
 const { comparePassword, encryptPassword } = require('../utils/encrypt');
 const UsersService = require('./users.services');
-const service = new UsersService();
+const userService = new UsersService();
 const nodemailer = require("nodemailer");
 const jwt = require('jsonwebtoken');
 const boom = require('@hapi/boom');
 
 class AuthService {
     async findExistingUser(email, password) {
-        const user = await service.findUserByEmail(email);
+        const user = await userService.findUserByEmail(email);
         const errMessage = 'The email or password provided is incorrect';
 
         if (user === null){
@@ -21,12 +21,11 @@ class AuthService {
         }
 
         delete user.dataValues.password;
-
         return user;
     }
 
     async sendMailToRecover(email) {
-        const user = await service.findUserByEmail(email);
+        const user = await userService.findUserByEmail(email);
 
         if (!user) {
             throw boom.unauthorized();
@@ -37,8 +36,8 @@ class AuthService {
             expiresIn: '15min',
         });
 
-        const link = `https://myfrontend.com/recovery?token=${token}`;
-        await service.updateUser(user.id, { recoveryToken: token });
+        const link = `${process.env.FRONTEND_URL}/success-recover?token=${token}`;
+        await userService.updateUser(user.id, { recoveryToken: token });
 
         let transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
@@ -53,25 +52,29 @@ class AuthService {
         await transporter.sendMail({
             to: email,
             subject: 'Nodemailer Test 👋',
-            html: `<div><p>Recover your account with this link:</p><a href='${link}'>${link}</a></div>`,
+            html: `<div><p>Recover your account with this link:</p><a href='${link}'>Recover Password</a></div>`,
         });
 
         return { message: 'Email sent correctly' };
     }
 
     async confirmRecovery(token, newPassword) {
-        const payload = jwt.verify(token, process.env.JWT_RECOVERY_SECRET);
+        try {
+            const payload = jwt.verify(token, process.env.JWT_RECOVERY_SECRET);
+            const recoveryToken = await userService.findRecoveryTokenById(payload.sub);
 
-        const user = await service.findUserById(payload.sub);
+            if (recoveryToken !== token) {
+                throw boom.unauthorized('The introduced token has expired.');
+            }
 
-        if (user.recoveryToken !== token) {
-            throw boom.unauthorized();
+            const hash = await encryptPassword(newPassword);
+            const updatedUser = await userService.updateUser(payload.sub, { recoveryToken: null, password: hash });
+
+            return { id: payload.sub, ...updatedUser };
         }
-
-        const hash = await encryptPassword(newPassword);
-        await service.updateUser(user.id, { recoveryToken: null, password: hash });
-
-        return { message: 'Password changed successfully' };
+        catch (err) {
+            throw boom.badRequest('Invalid token.');
+        }
     }
 }
 

@@ -8,11 +8,8 @@ const service = new CategoriesService();
 
 router.get('/',
     async (req, res, next) => {
-        // const { size, offset } = req.query;
-
         try {
             let result = await service.returnCategories();
-
             res.status(200).json(result);
         }
         catch (err){
@@ -28,7 +25,6 @@ router.get('/:id',
 
         try {
             let result = await service.findCategoryById(id);
-
             res.status(200).json(result);
         }
         catch (err){
@@ -76,6 +72,8 @@ router.post('/',
 // );
 
 router.patch('/:id',
+    passport.authenticate('jwt', { session: false }),
+    adminCheckHandler(),
     validatorHandler(categoryIdSchema, 'params'),
     validatorHandler(updateCategorySchema, 'body'),
     async (req, res, next) => {
@@ -94,6 +92,8 @@ router.patch('/:id',
 );
 
 router.delete('/:id',
+    passport.authenticate('jwt', { session: false }),
+    adminCheckHandler(),
     validatorHandler(categoryIdSchema, 'params'),
     async (req, res, next) => {
         const { id } = req.params;
