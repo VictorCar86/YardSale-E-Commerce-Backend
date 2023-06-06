@@ -16,22 +16,28 @@ class ProductsService {
         return user;
     }
 
-    returnProducts({ page = 0, minPrice, maxPrice }) {
+    returnProducts({ page = 0, minPrice, maxPrice, categoryId }) {
         return new Promise(async (resolve, reject) => {
             try {
                 let itemsPerPage = 10;
                 let currentOffset = 0;
                 const slicer = page - 1;
 
-                const whereOptions = { where: {
-                    productPrice: { [Op.between]: [minPrice, maxPrice] }
-                }};
+                const extraWhereOpts = {};
 
-                const productsLength = await this.#PRODUCT.count( minPrice && maxPrice ? whereOptions : undefined );
-                const maxPage = Math.floor((productsLength - itemsPerPage) / itemsPerPage + 1);
+                if (minPrice && maxPrice) {
+                    extraWhereOpts.productPrice = { [Op.between]: [minPrice, maxPrice] }
+                }
+                if (categoryId) {
+                    extraWhereOpts.categoryId = categoryId;
+                }
 
-                if (page > 0 && page <= maxPage){
-                    if (slicer >= maxPage){
+                const productsLength = await this.#PRODUCT.count({ where: extraWhereOpts });
+                let maxPage = Math.floor((productsLength - itemsPerPage) / itemsPerPage + 1);
+                if (maxPage === 0) maxPage = 1;
+
+                if (page > 0 && page <= maxPage) {
+                    if (slicer >= maxPage) {
                         currentOffset = maxPage;
                     }
                     else {
@@ -39,7 +45,7 @@ class ProductsService {
                     }
                 }
                 else {
-                    if (page > maxPage){
+                    if (page > maxPage) {
                         currentOffset = productsLength;
                     }
                     itemsPerPage = 0;
@@ -50,12 +56,8 @@ class ProductsService {
                     attributes: { exclude: ['createdAt', 'updatedAt'] },
                     limit: itemsPerPage || undefined,
                     offset: currentOffset || undefined,
-                    where: {}
+                    where: extraWhereOpts,
                 };
-
-                if (minPrice && maxPrice){
-                    options = {...options, where: whereOptions.where}
-                }
 
                 const currentQuery = await this.#PRODUCT.findAll(options);
 

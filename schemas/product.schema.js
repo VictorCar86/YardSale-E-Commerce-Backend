@@ -28,6 +28,7 @@ const productIdSchema = Joi.object({
 
 const productQuerySchema = Joi.object({
     page: number,
+    categoryId: number,
     minPrice: price,
     maxPrice: price.greater(Joi.ref('minPrice')),
 })

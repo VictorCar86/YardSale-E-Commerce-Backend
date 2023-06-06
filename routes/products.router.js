@@ -9,13 +9,12 @@ const service = new ProductsService();
 router.get('/',
     validatorHandler(productQuerySchema, 'query'),
     async (req, res, next) => {
-        let { page } = req.query;
-        // let currentPage = page;
+        let { page, maxPrice, minPrice, categoryId } = req.query;
         if (page){
             page = Number(page);
         }
         try {
-            const result = await service.returnProducts({ ...req.query, page });
+            const result = await service.returnProducts({ page, maxPrice, minPrice, categoryId });
             res.status(200).json(result);
         }
         catch (err){
