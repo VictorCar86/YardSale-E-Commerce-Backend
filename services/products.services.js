@@ -33,7 +33,7 @@ class ProductsService {
                 }
 
                 const productsLength = await this.#PRODUCT.count({ where: extraWhereOpts });
-                let maxPage = Math.floor((productsLength - itemsPerPage) / itemsPerPage + 1);
+                let maxPage = Math.round((productsLength - itemsPerPage) / itemsPerPage + 1);
                 if (maxPage === 0) maxPage = 1;
 
                 if (page > 0 && page <= maxPage) {

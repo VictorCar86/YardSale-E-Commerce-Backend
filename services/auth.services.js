@@ -1,9 +1,11 @@
 const { comparePassword, encryptPassword } = require('../utils/encrypt');
 const UsersService = require('./users.services');
 const userService = new UsersService();
-const nodemailer = require("nodemailer");
 const jwt = require('jsonwebtoken');
 const boom = require('@hapi/boom');
+const sendEmail = require('../utils/send_email');
+const fs = require('fs');
+const path = require('path');
 
 class AuthService {
     async findExistingUser(email, password) {
@@ -39,21 +41,39 @@ class AuthService {
         const link = `${process.env.FRONTEND_URL}/success-recover?token=${token}`;
         await userService.updateUser(user.id, { recoveryToken: token });
 
-        let transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.NODEMAILER_MAIL,
-                pass: process.env.NODEMAILER_PASSWORD,
-            },
-        });
+        const svg = fs.readFileSync(path.resolve(__dirname, '../public/assets/yardsale.svg'), 'utf-8');
 
-        await transporter.sendMail({
+        const emailConfig = {
             to: email,
-            subject: 'Nodemailer Test 👋',
-            html: `<div><p>Recover your account with this link:</p><a href='${link}'>Recover Password</a></div>`,
-        });
+            subject: 'Recover your password - YardSale',
+            html: `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                </head>
+                <body>
+                    <main style="padding: 45px 0px; text-align: center; font-weight: bold; font-family: sans-serif; background-color: #ffffff">
+                        ${svg}
+                        <p style="margin: 0px; font-size: 24px">
+                            <span>Hello</span>
+                            <span style="text-transform: capitalize;">${user.firstName}</span>
+                        </p>
+                        <p style="padding-bottom: 32px; color: #7b7b7b">
+                            A request has been received to change the password for your YardSale account.
+                        </p>
+                        <a style="padding: 14px 20px; border-radius: 6px; color: white; text-decoration: none; background-color: #ACD9B2" href='${link}'>
+                            Reset Password
+                        </a>
+                    </main>
+                    </body>
+                </html>
+            `,
+        }
+
+        sendEmail(emailConfig);
 
         return { message: 'Email sent correctly' };
     }
