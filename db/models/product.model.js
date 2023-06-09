@@ -16,7 +16,7 @@ const ProductSchema = {
     },
     image: {
         allowNull: true,
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
     },
     price: {
         allowNull: false,

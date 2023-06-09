@@ -16,10 +16,9 @@ class ProductsService {
         return user;
     }
 
-    returnProducts({ page = 0, minPrice, maxPrice, categoryId }) {
+    returnProducts({ page = 0, minPrice, maxPrice, categoryId, itemsPerPage = 10 }) {
         return new Promise(async (resolve, reject) => {
             try {
-                let itemsPerPage = 10;
                 let currentOffset = 0;
                 const slicer = page - 1;
 
