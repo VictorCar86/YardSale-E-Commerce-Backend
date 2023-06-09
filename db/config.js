@@ -10,5 +10,8 @@ module.exports = {
         url: connectionString,
         dialect: 'postgres',
         // dialect: 'mysql',
+        ssl: {
+            rejectUnauthorized: false,
+        }
     }
 };
