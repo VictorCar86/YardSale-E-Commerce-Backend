@@ -7,12 +7,15 @@ const setupModels = require('../db/models');
 const connectionString = require('../utils/connection.config');
 
 const isProd = process.env.NODE_ENV === 'production';
+const sslConfig = {
+	ssl: { rejectUnauthorized: false },
+};
 
 const sequelize = new Sequelize(connectionString, {
 	// dialect: 'mysql',
 	dialect: 'postgres',
 	logging: isProd ? false : console.log,
-	ssl: isProd ? { rejectUnauthorized: false } : undefined,
+	dialectOptions: isProd ? sslConfig : undefined,
 });
 
 setupModels(sequelize);
