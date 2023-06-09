@@ -2,8 +2,8 @@
 
 const { DataTypes } = require('sequelize');
 const { SHOPPINGCART_TABLE } = require('../models/shopping_cart.model');
-const { CUSTOMER_TABLE } = require('./customer.model');
-const { PRODUCT_TABLE } = require('./product.model');
+const { CUSTOMER_TABLE } = require('../models/customer.model');
+const { PRODUCT_TABLE } = require('../models/product.model');
 
 const ShoppingCartSchema = {
     id: {

@@ -2,7 +2,7 @@
 
 const { DataTypes } = require('sequelize');
 const { CUSTOMER_TABLE } = require('../models/customer.model');
-const { USER_TABLE } = require('./user.model');
+const { USER_TABLE } = require('../models/user.model');
 
 const CustomerSchema = {
     id: {
