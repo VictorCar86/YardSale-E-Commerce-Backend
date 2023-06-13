@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const passport = require('passport');
-const { /*validatorHandler,*/ } = require('../middlewares/validate.handler');
+// const { /*validatorHandler,*/ } = require('../middlewares/validate.handler');
 const ShoppingCartService = require('../services/shoppingcart.services');
 const service = new ShoppingCartService();
 // const boom = require('@hapi/boom');

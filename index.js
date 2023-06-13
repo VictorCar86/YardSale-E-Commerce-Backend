@@ -35,5 +35,7 @@ app.use(boomErrorHandler);
 app.use(errorHandler);
 
 app.listen(port, () => {
-    console.info(`Listening at port ${port}`);
+    if (process.env.NODE_ENV !== 'production'){
+        console.info(`Listening at port ${port}`);
+    }
 });
