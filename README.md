@@ -57,15 +57,15 @@ Most of the request requires a JWT (Json Web Token) previously provided by the a
 ## Technologies Used
 YardSale Backend is built using the following technologies:
 
-- <img src="https://skills.thijs.gg/icons?i=nodejs" width="18px"> Node.js: A JavaScript runtime environment used for executing server-side code.
-- <img src="https://skills.thijs.gg/icons?i=express" width="18px"> Express.js: A fast and minimal web application framework for Node.js, used for handling HTTP requests and building APIs.
-- <img src="https://skills.thijs.gg/icons?i=sequelize" width="18px"> Sequelize: A promise-based ORM (Object-Relational Mapping) for Node.js, used for database management and query operations.
-- <img src="https://skills.thijs.gg/icons?i=postgresql" width="18px"> PostgreSQL: A powerful and open-source relational database used for storing product information, user profiles, and order details.
-- 👮‍ Passport: A middleware for handling user authentication strategies, including local and JWT (JSON Web Token) authentication.
-- 🔐 Bcrypt: A library used for password hashing and salting to enhance security.
-- 📚 Dotenv: A module used for managing environment variables, such as database credentials and API keys.
-- 📩 Nodemailer: A module used for sending transactional emails, such as order confirmations and password reset emails.
-- 🔎 Cors: A middleware used for enabling Cross-Origin Resource Sharing (CORS) to handle requests from the frontend.
+- <img src="https://skills.thijs.gg/icons?i=nodejs" width="18px"> Node.js
+- <img src="https://skills.thijs.gg/icons?i=express" width="18px"> Express.js
+- <img src="https://skills.thijs.gg/icons?i=sequelize" width="18px"> Sequelize
+- <img src="https://skills.thijs.gg/icons?i=postgresql" width="18px"> PostgreSQL
+- 👮‍ Passport
+- 🔐 Bcrypt
+- 📚 Dotenv
+- 📩 Nodemailer
+- 🔎 Cors
 
 ## Installation
 To run the YardSale Backend locally, follow these steps:
