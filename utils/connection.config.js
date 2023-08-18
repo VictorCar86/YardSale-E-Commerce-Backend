@@ -7,17 +7,22 @@ const {
     DB_PASSWORD,
     DB_HOST,
     DB_PORT,
-    DB_NAME
+    DB_NAME,
+    DB_CONFIG,
 } = process.env;
 
-const encodeUser = encodeURIComponent(DB_USER);
+let connectionString = "";
 
-const encodePassword = encodeURIComponent(DB_PASSWORD);
+if (DB_CONFIG) connectionString = DB_CONFIG;
+else {
+    const encodeUser = encodeURIComponent(DB_USER);
+    const encodePassword = encodeURIComponent(DB_PASSWORD);
 
-/* MYSQL */
-// const connectionString = `mysql://${encodeUser}:${encodePassword}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+    /* MYSQL */
+    // connectionString = `mysql://${encodeUser}:${encodePassword}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
 
-/* POSTGRES */
-const connectionString = `postgres://${encodeUser}:${encodePassword}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+    /* POSTGRES */
+    connectionString = `postgres://${encodeUser}:${encodePassword}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+}
 
 module.exports = connectionString;

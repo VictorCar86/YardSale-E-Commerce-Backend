@@ -8,7 +8,7 @@ const port = process.env.PORT || 8080;
 
 const { logErrors, errorHandler, boomErrorHandler } = require('./middlewares/error.handler')
 
-const whiteList = [process.env.FRONTEND_URL];
+const whiteList = [process.env.FRONTEND_URL,];
 
 const corsOptions = {
     origin: (origin, callback) => {
