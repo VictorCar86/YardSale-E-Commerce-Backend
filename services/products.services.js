@@ -1,22 +1,22 @@
-const boom = require('@hapi/boom');
-const { Op } = require('sequelize');
+const boom = require("@hapi/boom");
+const { Op } = require("sequelize");
 
 class ProductsService {
-
-    #SEQUELIZE = require('../libs/sequelize');
+    #SEQUELIZE = require("../libs/sequelize");
     #PRODUCT = this.#SEQUELIZE.models.Product;
+    #CATEGORY = this.#SEQUELIZE.models.Category;
 
-    async #FIND_PRODUCT(id, options = undefined){
+    async #FIND_PRODUCT(id, options = undefined) {
         const user = await this.#PRODUCT.findByPk(id, options);
 
-        if (user === null){
+        if (user === null) {
             throw boom.notFound(`The element with id '${id}' does not exist`);
         }
 
         return user;
     }
 
-    returnProducts({ page = 0, minPrice, maxPrice, categoryId, itemsPerPage = 10 }) {
+    returnProducts({ page = 0, minPrice, maxPrice, category, itemsPerPage = 10 }) {
         return new Promise(async (resolve, reject) => {
             try {
                 let currentOffset = 0;
@@ -25,25 +25,31 @@ class ProductsService {
                 const extraWhereOpts = {};
 
                 if (minPrice && maxPrice) {
-                    extraWhereOpts.productPrice = { [Op.between]: [minPrice, maxPrice] }
+                    extraWhereOpts.productPrice = { [Op.between]: [minPrice, maxPrice] };
                 }
-                if (categoryId) {
-                    extraWhereOpts.categoryId = categoryId;
+                if (category) {
+                    const categoryQuery = await this.#CATEGORY.findOne({
+                        where: { name: category },
+                    });
+                    extraWhereOpts.categoryId = categoryQuery?.id ?? null;
                 }
 
-                const productsLength = await this.#PRODUCT.count({ where: extraWhereOpts });
-                let maxPage = Math.round((productsLength - itemsPerPage) / itemsPerPage + 1);
+                const productsLength = await this.#PRODUCT.count({
+                    where: extraWhereOpts,
+                });
+                let maxPage = Math.round(
+                    (productsLength - itemsPerPage) / itemsPerPage + 1,
+                );
+
                 if (maxPage === 0) maxPage = 1;
 
                 if (page > 0 && page <= maxPage) {
                     if (slicer >= maxPage) {
                         currentOffset = maxPage;
-                    }
-                    else {
+                    } else {
                         currentOffset = itemsPerPage * slicer;
                     }
-                }
-                else {
+                } else {
                     if (page > maxPage) {
                         currentOffset = productsLength;
                     }
@@ -51,8 +57,8 @@ class ProductsService {
                 }
 
                 let options = {
-                    include: ['category'],
-                    attributes: { exclude: ['createdAt', 'updatedAt'] },
+                    include: ["category"],
+                    attributes: { exclude: ["createdAt", "updatedAt"] },
                     limit: itemsPerPage || undefined,
                     offset: currentOffset || undefined,
                     where: extraWhereOpts,
@@ -67,8 +73,7 @@ class ProductsService {
                 };
 
                 resolve(dataResult);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(boom.serverUnavailable(error));
             }
         });
@@ -80,8 +85,7 @@ class ProductsService {
                 const currentProduct = await this.#FIND_PRODUCT(id);
 
                 resolve(currentProduct.dataValues);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(error);
             }
         });
@@ -90,11 +94,13 @@ class ProductsService {
     createProduct(data) {
         return new Promise(async (resolve, reject) => {
             try {
-                const newProduct = await this.#PRODUCT.create(data);
-
-                resolve(newProduct);
-            }
-            catch (error) {
+                if (Array.isArray(data)) {
+                    resolve(await this.#PRODUCT.bulkCreate(data));
+                }
+                if (typeof data === "object") {
+                    resolve(await this.#PRODUCT.create(data));
+                }
+            } catch (error) {
                 reject(boom.serverUnavailable(error));
             }
         });
@@ -105,13 +111,12 @@ class ProductsService {
             try {
                 const currentProduct = await this.#FIND_PRODUCT(id);
 
-                const dataWithDate = {...data, updatedAt: new Date()};
+                const dataWithDate = { ...data, updatedAt: new Date() };
 
                 const updatedProduct = await currentProduct.update(dataWithDate);
 
                 resolve(updatedProduct);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(boom.serverUnavailable(error));
             }
         });
@@ -125,13 +130,11 @@ class ProductsService {
                 await currentProduct.destroy();
 
                 resolve(currentProduct.dataValues);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(error);
             }
         });
     }
 }
-
 
 module.exports = ProductsService;

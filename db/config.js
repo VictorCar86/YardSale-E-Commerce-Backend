@@ -1,19 +1,19 @@
-const connectionString = require('../utils/connection.config');
+const connectionString = require("../utils/connection.config");
 
 module.exports = {
     development: {
         url: connectionString,
-        dialect: 'postgres',
+        dialect: "postgres",
         // dialect: 'mysql',
     },
     production: {
         url: connectionString,
-        dialect: 'postgres',
+        dialect: "postgres",
         // dialect: 'mysql',
         dialectOptions: {
             ssl: {
                 rejectUnauthorized: false,
-            }
-        }
-    }
+            },
+        },
+    },
 };

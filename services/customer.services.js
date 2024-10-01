@@ -1,14 +1,14 @@
-const boom = require('@hapi/boom');
+const boom = require("@hapi/boom");
 
 class CustomersService {
-
-    #SEQUELIZE = require('../libs/sequelize');
+    #SEQUELIZE = require("../libs/sequelize");
+    #USER = this.#SEQUELIZE.models.User;
     #CUSTOMER = this.#SEQUELIZE.models.Customer;
 
-    async #FIND_CUSTOMER(id, options = {}){
+    async #FIND_CUSTOMER(id, options = {}) {
         const user = await this.#CUSTOMER.findByPk(id, options);
 
-        if (user === null){
+        if (user === null) {
             throw boom.notFound(`The element with id '${id}' does not exist`);
         }
 
@@ -19,27 +19,25 @@ class CustomersService {
         return new Promise(async (resolve, reject) => {
             try {
                 const currentQuery = await this.#CUSTOMER.findAll({
-                    include: ['user']
+                    include: ["user"],
                 });
 
                 resolve(currentQuery);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(boom.serverUnavailable(error));
             }
-        })
+        });
     }
 
     findCustomerById(id) {
         return new Promise(async (resolve, reject) => {
             try {
                 const currentCustomer = await this.#FIND_CUSTOMER(id, {
-                    include: ['user']
+                    include: ["user"],
                 });
 
                 resolve(currentCustomer.dataValues);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(error);
             }
         });
@@ -48,19 +46,17 @@ class CustomersService {
     createCustomer(data) {
         return new Promise(async (resolve, reject) => {
             try {
+                if (!data.userId) {
+                    const newUser = await this.#USER.create(data);
+                    data.userId = newUser.id;
+                }
                 const newCustomer = await this.#CUSTOMER.create(
-                    { ...data, role: 'customer' },
-                    { include: ['user'] }
+                    { ...data, role: "customer" },
+                    { include: ["user"] },
                 );
-
-                delete newCustomer.user.dataValues.password;
-                delete newCustomer.user.dataValues.createdAt;
-                delete newCustomer.user.dataValues.updatedAt;
-                delete newCustomer.user.dataValues.recoveryToken;
-
+                delete newCustomer.dataValues.updatedAt;
                 resolve(newCustomer);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(boom.serverUnavailable(error));
             }
         });
@@ -71,13 +67,12 @@ class CustomersService {
             try {
                 const currentCustomer = await this.#FIND_CUSTOMER(id);
 
-                const dataWithDate = {...data, updated_at: new Date()};
+                const dataWithDate = { ...data, updated_at: new Date() };
 
                 const updatedCustomer = await currentCustomer.update(dataWithDate);
 
                 resolve(updatedCustomer);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(boom.serverUnavailable(error));
             }
         });
@@ -91,13 +86,11 @@ class CustomersService {
                 await currentCustomer.destroy();
 
                 resolve(currentCustomer.dataValues);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(error);
             }
-        })
+        });
     }
 }
-
 
 module.exports = CustomersService;

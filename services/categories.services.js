@@ -1,14 +1,13 @@
-const boom = require('@hapi/boom');
+const boom = require("@hapi/boom");
 
 class CategoriesService {
-
-    #SEQUELIZE = require('../libs/sequelize');
+    #SEQUELIZE = require("../libs/sequelize");
     #CATEGORY = this.#SEQUELIZE.models.Category;
 
-    async #FIND_CATEGORY(id, options = undefined){
+    async #FIND_CATEGORY(id, options = undefined) {
         const user = await this.#CATEGORY.findByPk(id, options);
 
-        if (user === null){
+        if (user === null) {
             throw boom.notFound(`The element with id '${id}' does not exist`);
         }
 
@@ -21,21 +20,21 @@ class CategoriesService {
                 const currentQuery = await this.#CATEGORY.findAll();
 
                 resolve(currentQuery);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(boom.serverUnavailable(error));
             }
-        })
+        });
     }
 
     findCategoryById(id) {
         return new Promise(async (resolve, reject) => {
             try {
-                const currentCategory = await this.#FIND_CATEGORY(id, { include: ['products'] });
+                const currentCategory = await this.#FIND_CATEGORY(id, {
+                    include: ["products"],
+                });
 
                 resolve(currentCategory.dataValues);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(error);
             }
         });
@@ -44,11 +43,13 @@ class CategoriesService {
     createCategory(data) {
         return new Promise(async (resolve, reject) => {
             try {
-                const newCategory = await this.#CATEGORY.create(data);
-
-                resolve(newCategory);
-            }
-            catch (error) {
+                if (Array.isArray(data)) {
+                    resolve(await this.#CATEGORY.bulkCreate(data));
+                }
+                if (typeof data === "object") {
+                    resolve(await this.#CATEGORY.create(data));
+                }
+            } catch (error) {
                 reject(boom.serverUnavailable(error));
             }
         });
@@ -59,13 +60,12 @@ class CategoriesService {
             try {
                 const currentCategory = await this.#FIND_CATEGORY(id);
 
-                const dataWithDate = {...data, updatedAt: new Date()};
+                const dataWithDate = { ...data, updatedAt: new Date() };
 
                 const updatedCategory = await currentCategory.update(dataWithDate);
 
                 resolve(updatedCategory);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(boom.serverUnavailable(error));
             }
         });
@@ -79,13 +79,11 @@ class CategoriesService {
                 await currentCategory.destroy();
 
                 resolve(currentCategory.dataValues);
-            }
-            catch (error) {
+            } catch (error) {
                 reject(error);
             }
         });
     }
 }
-
 
 module.exports = CategoriesService;

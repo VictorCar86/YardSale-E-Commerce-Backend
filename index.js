@@ -1,18 +1,22 @@
-const cors = require('cors');
-const express = require('express');
-const routerApi = require('./routes/index');
+const cors = require("cors");
+const express = require("express");
+const routerApi = require("./routes/index");
 const app = express();
-const boom = require('@hapi/boom');
-const cookieParser = require('cookie-parser');
+const boom = require("@hapi/boom");
+const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 8080;
 
-const { logErrors, errorHandler, boomErrorHandler } = require('./middlewares/error.handler')
+const {
+    logErrors,
+    errorHandler,
+    boomErrorHandler,
+} = require("./middlewares/error.handler");
 
-const whiteList = [process.env.FRONTEND_URL,];
+const whiteList = [process.env.FRONTEND_URL];
 
 const corsOptions = {
     origin: (origin, callback) => {
-        if (whiteList.includes(origin) || origin === undefined){
+        if (whiteList.includes(origin) || origin === undefined) {
             callback(null, true);
         } else {
             callback(boom.unauthorized());
@@ -21,9 +25,9 @@ const corsOptions = {
     credentials: true,
 };
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + "/public"));
 
-require('./auth');
+require("./auth");
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
@@ -35,7 +39,7 @@ app.use(boomErrorHandler);
 app.use(errorHandler);
 
 app.listen(port, () => {
-    if (process.env.NODE_ENV !== 'production'){
+    if (process.env.NODE_ENV !== "production") {
         console.info(`Listening at port ${port}`);
     }
 });

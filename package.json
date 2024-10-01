@@ -3,10 +3,12 @@
   "version": "1.1.0",
   "description": "",
   "main": "index.js",
+  "node": "v20.17.0",
   "scripts": {
     "dev": "nodemon -L index.js",
     "start": "node index.js",
     "lint": "eslint",
+    "seed": "node db/seed.js",
     "migrations:generate": "sequelize-cli migration:generate --name",
     "migrations:run": "sequelize-cli db:migrate",
     "migrations:revert": "sequelize-cli db:migrate:undo",
@@ -19,9 +21,11 @@
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "nodemon": "^3.1.7",
     "prettier": "^2.7.1"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.0.3",
     "@hapi/boom": "^10.0.0",
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.6",

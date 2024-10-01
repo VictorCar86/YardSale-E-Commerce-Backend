@@ -1,4 +1,4 @@
-const Joi = require('joi');
+const Joi = require("joi");
 
 const number = Joi.number().integer();
 const name = Joi.string().min(3).max(20);
@@ -28,12 +28,17 @@ const productIdSchema = Joi.object({
 
 const productQuerySchema = Joi.object({
     page: number,
-    categoryId: number,
+    category: Joi.string().allow("", null),
     itemsPerPage: number,
     minPrice: price,
-    maxPrice: price.greater(Joi.ref('minPrice')),
+    maxPrice: price.greater(Joi.ref("minPrice")),
 })
-.with('minPrice', 'maxPrice')
-.with('maxPrice', 'minPrice');
+    .with("minPrice", "maxPrice")
+    .with("maxPrice", "minPrice");
 
-module.exports = { createProductSchema, updateProductSchema, productIdSchema, productQuerySchema };
+module.exports = {
+    createProductSchema,
+    updateProductSchema,
+    productIdSchema,
+    productQuerySchema,
+};
