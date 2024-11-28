@@ -37,6 +37,7 @@ Icon
 .Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
+rsync_ec2.sh
 
 # Directories potentially created on remote AFP share
 .AppleDB
